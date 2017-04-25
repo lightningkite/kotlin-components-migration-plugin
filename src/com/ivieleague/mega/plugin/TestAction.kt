@@ -4,10 +4,19 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.LangDataKeys
 import com.intellij.openapi.actionSystem.PlatformDataKeys
+import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.ui.Messages
 import com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.asJava.elements.KtLightElement
 import org.jetbrains.kotlin.psi.KtClass
+import org.jetbrains.kotlin.psi.KtFunction
+import org.jetbrains.kotlin.psi.KtObjectDeclaration
+import org.jetbrains.kotlin.psi.KtPsiFactory
+import kotlin.reflect.KFunction
+import groovyjarjarantlr.CodeGenerator
+import com.intellij.testFramework.LightPlatformTestCase.getProject
+
+
 
 
 /**
@@ -17,13 +26,25 @@ import org.jetbrains.kotlin.psi.KtClass
 class TestAction : AnAction() {
 
     override fun actionPerformed(event: AnActionEvent) {
-        val project = event.getData(PlatformDataKeys.PROJECT)
         try {
-            val type = getKtClassFromAction(event)
-            println(type?.docComment?.text)
-            Messages.showMessageDialog(project, "The class currently selected is called ${type?.name}", "Information", Messages.getInformationIcon())
-        } catch(e: Throwable) {
-            Messages.showMessageDialog(project, "It died.  ${e.message}", "Information", Messages.getInformationIcon())
+            val project = event.getData(PlatformDataKeys.PROJECT)
+            val type = getKtClassFromAction(event) ?: return
+            println(type.docComment?.text)
+            Messages.showMessageDialog(project, "The class currently selected is called ${type.name}", "Information", Messages.getInformationIcon())
+
+            val factory = KtPsiFactory(event.project)
+            val functions = type.declarations.filter { decl -> decl is KtFunction }
+            val body = type.getBody() ?: return
+            println("Body found, writing")
+            object : WriteCommandAction.Simple<Unit>(project, type.containingFile) {
+                @Throws(Throwable::class)
+                override fun run() {
+                    for (func in functions) {
+                        body.addBefore(factory.createFunction("fun ${func.name}Plus() = ${func.name}()"), body.rBrace!!)
+                    }
+                }
+            }.execute()
+        } catch(e:Throwable){
             e.printStackTrace()
         }
     }
