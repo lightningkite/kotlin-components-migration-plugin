@@ -5,18 +5,12 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.LangDataKeys
 import com.intellij.openapi.actionSystem.PlatformDataKeys
 import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.asJava.elements.KtLightElement
 import org.jetbrains.kotlin.psi.KtClass
-import org.jetbrains.kotlin.psi.KtFunction
-import org.jetbrains.kotlin.psi.KtObjectDeclaration
 import org.jetbrains.kotlin.psi.KtPsiFactory
-import kotlin.reflect.KFunction
-import groovyjarjarantlr.CodeGenerator
-import com.intellij.testFramework.LightPlatformTestCase.getProject
-
-
 
 
 /**
@@ -29,24 +23,39 @@ class TestAction : AnAction() {
         try {
             val project = event.getData(PlatformDataKeys.PROJECT)
             val type = getKtClassFromAction(event) ?: return
-            println(type.docComment?.text)
-            Messages.showMessageDialog(project, "The class currently selected is called ${type.name}", "Information", Messages.getInformationIcon())
-
-            val factory = KtPsiFactory(event.project)
-            val functions = type.declarations.filter { decl -> decl is KtFunction }
-            val body = type.getBody() ?: return
-            println("Body found, writing")
-            object : WriteCommandAction.Simple<Unit>(project, type.containingFile) {
-                @Throws(Throwable::class)
-                override fun run() {
-                    for (func in functions) {
-                        body.addBefore(factory.createFunction("fun ${func.name}Plus() = ${func.name}()"), body.rBrace!!)
-                    }
-                }
-            }.execute()
-        } catch(e:Throwable){
+            handleType(event, project, type)
+        } catch(e: Throwable) {
             e.printStackTrace()
         }
+    }
+
+    private fun handleType(event: AnActionEvent, project: Project?, type: KtClass) {
+        println(type.docComment?.text)
+        Messages.showMessageDialog(project, "The class currently selected is called ${type.name}", "Information", Messages.getInformationIcon())
+
+        val conversionTool = ConversionTool().apply {
+            nameMap["kotlin.Byte"] = "mega.integer.signed.1"
+            nameMap["kotlin.Short"] = "mega.integer.signed.2"
+            nameMap["kotlin.Int"] = "mega.integer.signed.4"
+            nameMap["kotlin.Long"] = "mega.integer.signed.8"
+            nameMap["kotlin.Float"] = "mega.float.4"
+            nameMap["kotlin.Double"] = "mega.float.8"
+        }
+        val factory = KtPsiFactory(event.project)
+        val functions = type.functionSequence().toList()
+        functions.forEach {
+            println(conversionTool.generateInterpretation(it))
+        }
+        val body = type.getBody() ?: return
+        println("Body found, writing")
+        object : WriteCommandAction.Simple<Unit>(project, type.containingFile) {
+            @Throws(Throwable::class)
+            override fun run() {
+                for (func in functions) {
+                    body.addBefore(factory.createFunction("fun ${func.name}Plus() = ${func.name}()"), body.rBrace!!)
+                }
+            }
+        }.execute()
     }
 
     fun getKtClassFromAction(event: AnActionEvent): KtClass? {
