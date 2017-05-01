@@ -2,8 +2,8 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
-      <module name="MegaPlugin_main" target="1.8" />
-      <module name="MegaPlugin_test" target="1.8" />
+      <module name="kotlin-components-migration-plugin_main" target="1.8" />
+      <module name="kotlin-components-migration-plugin_test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

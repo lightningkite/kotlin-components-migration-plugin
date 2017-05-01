@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/MegaPlugin.iml" filepath="$PROJECT_DIR$/MegaPlugin.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MegaPlugin_main.iml" filepath="$PROJECT_DIR$/.idea/modules/MegaPlugin_main.iml" group="MegaPlugin" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MegaPlugin_test.iml" filepath="$PROJECT_DIR$/.idea/modules/MegaPlugin_test.iml" group="MegaPlugin" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/kotlin-components-migration-plugin.iml" filepath="$PROJECT_DIR$/.idea/modules/kotlin-components-migration-plugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/kotlin-components-migration-plugin_main.iml" filepath="$PROJECT_DIR$/.idea/modules/kotlin-components-migration-plugin_main.iml" group="kotlin-components-migration-plugin" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/kotlin-components-migration-plugin_test.iml" filepath="$PROJECT_DIR$/.idea/modules/kotlin-components-migration-plugin_test.iml" group="kotlin-components-migration-plugin" />
     </modules>
   </component>
 </project>

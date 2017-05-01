@@ -37,7 +37,7 @@ dependencies {
 }
 
 intellij {
-    plugins 'kotlin'
+    plugins 'Kotlin'
 }
 
 sourceSets {
